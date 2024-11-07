@@ -4,7 +4,8 @@ import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 
 # 定义股票代码
-ticker_symbol = "AAPL"  # 以苹果公司为例
+data_year = 2024
+ticker_symbol = "MSFT"  # AAPL、GOOGL、MSFT
 ticker = yf.Ticker(ticker_symbol)
 
 # 获取股价数据（历史每日收盘价），扩展查询范围
@@ -68,12 +69,12 @@ combined_data = price_data.join(pe_ratio[['PE_Ratio']])
 combined_data.drop(columns=['Dividends', 'Stock Splits'], inplace=True, errors='ignore')
 
 # 筛选出2024年的数据
-combined_data_2024 = combined_data[combined_data.index.year == 2024]
+combined_data_2024 = combined_data[combined_data.index.year == data_year]
 
 # 将结果保存到 CSV 文件
-combined_data_2024.to_csv('AAPL_financial_indicators_2024.csv', index=True)  # 保存2024年的数据
+combined_data_2024.to_csv(f'{ticker_symbol}_financial_indicators_{data_year}.csv', index=True)  # 保存2024年的数据
 
-print("Financial indicators and P/E Ratios for 2024 saved to 'AAPL_financial_indicators_2024.csv'")
+print(f"Financial indicators and P/E Ratios for {data_year} saved to '{ticker_symbol}_financial_indicators_{data_year}.csv'")
 
-# 显示2024年的数据
+# 显示儲存的数据
 print(combined_data_2024)
