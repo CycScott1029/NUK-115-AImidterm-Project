@@ -7,9 +7,11 @@ import numpy as np
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 import matplotlib.pyplot as plt
 
+data_name = "GOOGL"
+
 # 加載指定市場模型和分詞器的函數
 def load_model_and_tokenizer(market_condition):
-    model_path = f"./gpt_neo_{market_condition}_model"  # 根據市場條件選擇相應的模型路徑
+    model_path = f"./gpt_neo_{data_name}_{market_condition}_model"  # 根據市場條件選擇相應的模型路徑
     model = GPTNeoForCausalLM.from_pretrained(model_path)
     tokenizer = GPT2Tokenizer.from_pretrained(model_path)
     tokenizer.pad_token = tokenizer.eos_token  # 設置填充符號
@@ -72,7 +74,7 @@ def main():
         return
 
     # 加載新的 CSV 數據
-    file_path = './data_set/AAPL_financial_indicators_2024.csv'
+    file_path = f'./data_set/{data_name}_financial_indicators_2024.csv'
     stock_data = pd.read_csv(file_path)
 
     # 選擇相同的欄位
@@ -96,7 +98,7 @@ def main():
         "True Close Price": true_values,
         "Predicted Close Price": predictions
     })
-    output_file = f"{market_condition}_predictions_comparison.csv"
+    output_file = f"{data_name}_{market_condition}_predictions_comparison.csv"
     results_df.to_csv(output_file, index=False)
     print(f"Predictions saved to {output_file}")
 
@@ -114,7 +116,7 @@ def main():
     plt.legend()
     
     # 保存圖片
-    image_file = f"{market_condition}_predictions_plot.png"
+    image_file = f"{data_name}_{market_condition}_predictions_plot.png"
     plt.savefig(image_file)
     print(f"Plot saved to {image_file}")
     

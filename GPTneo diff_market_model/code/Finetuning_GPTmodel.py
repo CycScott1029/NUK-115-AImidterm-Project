@@ -3,9 +3,9 @@ import pandas as pd
 import torch
 import json
 
-# 參數 {neutral_market、bear_market、bull_market}
-market_conditions = "bull_market"
 
+market_conditions = "bull_market" # {neutral_market、bear_market、bull_market}
+data_name = "GOOGL" # {APPL、GOOGL、MFST}
 # 檢查是否有可用的 GPU
 device = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"Using device: {device}")
@@ -13,7 +13,7 @@ print(f"Using device: {device}")
 
 
 # 加載 CSV 數據
-file_path = f'./data_set/AAPL_{market_conditions}_data.csv'  # 微調的輸入檔案
+file_path = f'./data_set/{data_name}_{market_conditions}_data.csv'  # 微調的輸入檔案
 try:
     stock_data = pd.read_csv(file_path)
 except FileNotFoundError:
@@ -78,7 +78,7 @@ dataset = StockDataset(data)
 
 # 4. 訓練參數
 training_args = TrainingArguments(
-    output_dir= f"./gpt_neo_{market_conditions}_model",
+    output_dir= f"./gpt_neo_{data_name}_{market_conditions}_model",
     overwrite_output_dir=True,
     num_train_epochs=3,
     per_device_train_batch_size=2,
@@ -99,7 +99,7 @@ trainer = Trainer(
 trainer.train()
 
 # 6. 保存模型
-trainer.save_model(f"./gpt_neo_{market_conditions}_model")
-tokenizer.save_pretrained(f"./gpt_neo_{market_conditions}_model")
+trainer.save_model(f"./gpt_neo_{data_name}_{market_conditions}_model")
+tokenizer.save_pretrained(f"./gpt_neo_{data_name}_{market_conditions}_model")
 
 print("模型微調完成並已保存")

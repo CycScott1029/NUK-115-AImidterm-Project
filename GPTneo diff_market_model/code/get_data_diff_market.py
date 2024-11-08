@@ -4,8 +4,7 @@ import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 
 # 定义股票代码
-data_year = 2024
-ticker_symbol = "MSFT"  # AAPL、GOOGL、MSFT
+ticker_symbol = "GOOGL"  # 以苹果公司为例
 ticker = yf.Ticker(ticker_symbol)
 
 # 获取股价数据（历史每日收盘价），扩展查询范围
@@ -16,6 +15,7 @@ price_data = price_data[price_data['Volume'] > 0]  # 删除成交量为零的行
 # 计算移动平均线
 price_data['30-day MA'] = price_data['Close'].rolling(window=30).mean()
 price_data['90-day MA'] = price_data['Close'].rolling(window=90).mean()
+price_data['200-day MA'] = price_data['Close'].rolling(window=200).mean()
 
 # 计算波动率（以日收益的滚动标准差表示）
 price_data['Volatility'] = price_data['Close'].pct_change().rolling(window=30).std()
@@ -68,13 +68,27 @@ combined_data = price_data.join(pe_ratio[['PE_Ratio']])
 # 删除不需要的列（Dividends 和 Stock Splits）
 combined_data.drop(columns=['Dividends', 'Stock Splits'], inplace=True, errors='ignore')
 
-# 筛选出2024年的数据
-combined_data_2024 = combined_data[combined_data.index.year == data_year]
+# 定义市场状况函数
+def get_market_condition(row, ma_col='200-day MA'):
+    if row['Close'] > row[ma_col] * 1.05:
+        return 'Bull Market'  # 牛市
+    elif row['Close'] < row[ma_col] * 0.95:
+        return 'Bear Market'  # 熊市
+    else:
+        return 'Neutral Market'  # 中立市場
 
-# 将结果保存到 CSV 文件
-combined_data_2024.to_csv(f'{ticker_symbol}_financial_indicators_{data_year}.csv', index=True)  # 保存2024年的数据
+# 根据价格相对 200 天移动平均线的关系判断市场状况
+combined_data['Market Condition'] = combined_data.apply(get_market_condition, axis=1)
 
-print(f"Financial indicators and P/E Ratios for {data_year} saved to '{ticker_symbol}_financial_indicators_{data_year}.csv'")
+# 筛选不同市场状况的数据
+bull_market_data = combined_data[combined_data['Market Condition'] == 'Bull Market']
+bear_market_data = combined_data[combined_data['Market Condition'] == 'Bear Market']
+neutral_market_data = combined_data[combined_data['Market Condition'] == 'Neutral Market']
 
-# 显示儲存的数据
-print(combined_data_2024)
+# 保存不同市场状况的数据到 CSV 文件
+bull_market_data.to_csv(f'{ticker_symbol}_bull_market_data.csv', index=True)
+bear_market_data.to_csv(f'{ticker_symbol}_bear_market_data.csv', index=True)
+neutral_market_data.to_csv(f'{ticker_symbol}_neutral_market_data.csv', index=True)
+
+# 输出保存成功的提示
+print("不同市场状况的数据已保存至 CSV 文件：牛市、熊市、中立市场")
